@@ -1,0 +1,44 @@
+import cv2
+import numpy as np
+import os
+
+# Update the path to the folder where images are extracted
+sprites_dir = "C:/Users/Dell 5406/Downloads/aero-pokemon-data/data" # Adjust the file path accordingly  
+
+# Function to count red pixels in an image
+def count_red_pixels(image_path):
+    image = cv2.imread(image_path)
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # Define HSV ranges for red pixels
+    low_red_1 = np.array([0, 100, 20])
+    high_red_1 = np.array([10, 255, 255])
+    low_red_2 = np.array([160, 100, 20])
+    high_red_2 = np.array([179, 255, 255])
+
+    # Create masks for red pixels
+    mask1 = cv2.inRange(hsv_image, low_red_1, high_red_1)
+    mask2 = cv2.inRange(hsv_image, low_red_2, high_red_2)
+    red_mask = cv2.bitwise_or(mask1, mask2)
+
+    # Count red pixels
+    red_pixel_count = cv2.countNonZero(red_mask)
+    return red_pixel_count
+
+# List to store Pokémon with their red pixel counts
+red_pixel_counts = []
+
+# Iterate through each image in the sprites directory
+for image_name in os.listdir(sprites_dir):
+    pokemon_name = os.path.splitext(image_name)[0]  # Get the name 
+    image_path = os.path.join(sprites_dir, image_name)
+    red_pixels = count_red_pixels(image_path)
+    red_pixel_counts.append((pokemon_name, red_pixels))
+
+# Sort Pokémon by their red pixel count in descending order
+red_pixel_counts.sort(key=lambda x: x[1], reverse=True)
+
+# Display the top three Pokémon with the most red pixels
+top_three = red_pixel_counts[:3]
+for pokemon, count in top_three:
+    print(f"{pokemon}: Red Pixel Count = {count}")
